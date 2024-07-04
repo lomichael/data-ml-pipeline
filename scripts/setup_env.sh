@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# Stop any previously running services
+sudo -u hadoopuser /usr/local/hadoop/sbin/stop-dfs.sh
+sudo -u hadoopuser /usr/local/hadoop/sbin/stop-yarn.sh
+pkill -f zookeeper
+pkill -f kafka
+pkill -f spark
+
+# Remove temporary files and logs
+sudo rm -rf /tmp/*
+sudo find /var/log -type f -name "*.log" -delete
+
+# Clean up Docker containers, images, volumes, and networks
+docker container prune -f
+docker image prune -a -f
+docker volume prune -f
+docker network prune -f
+
 # Update and install dependencies
 sudo apt-get update
 sudo apt-get install -y openjdk-11-jdk python3-pip git docker.io
