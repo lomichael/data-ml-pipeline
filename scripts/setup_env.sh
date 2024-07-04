@@ -61,17 +61,17 @@ tar -xzvf spark-3.5.1-bin-hadoop3.tgz
 sudo mv spark-3.5.1-bin-hadoop3 /usr/local/spark
 
 # Install Python packages
-pip3 install kafka-python hdfs pyspark torch flask optuna redis psycopg2-binary
+pip3 install --user kafka-python hdfs pyspark torch flask optuna redis psycopg2-binary
 
 # Set environment variables
 echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> ~/.bashrc
 echo "export HADOOP_HOME=/usr/local/hadoop" >> ~/.bashrc
-echo "export PATH=\$PATH:\$JAVA_HOME/bin:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin:/usr/local/spark/bin" >> ~/.bashrc
+echo "export PATH=\$PATH:\$JAVA_HOME/bin:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin:/usr/local/spark/bin:/home/ubuntu/.local/bin" >> ~/.bashrc
 source ~/.bashrc
 
 # Enable Docker BuildKit
 export DOCKER_BUILDKIT=1
-docker buildx create --use
+docker buildx create --name mybuilder --driver docker-container --use
 
 # Format Namenode
 sudo -u hadoopuser /usr/local/hadoop/bin/hdfs namenode -format
@@ -81,7 +81,7 @@ sudo -u hadoopuser /usr/local/hadoop/sbin/start-dfs.sh
 sudo -u hadoopuser /usr/local/hadoop/sbin/start-yarn.sh
 
 # Exit Hadoop safe mode
-hdfs dfsadmin -safemode leave
+sudo -u hadoopuser hdfs dfsadmin -safemode leave
 
 # Set an alternate temporary directory
 export TMPDIR=/path/to/larger/tmpdir
