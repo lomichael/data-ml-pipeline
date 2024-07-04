@@ -63,6 +63,12 @@ sudo -u hadoopuser /usr/local/hadoop/bin/hdfs namenode -format
 sudo -u hadoopuser /usr/local/hadoop/sbin/start-dfs.sh
 sudo -u hadoopuser /usr/local/hadoop/sbin/start-yarn.sh
 
+# Exit Hadoop safe mode
+hdfs dfsadmin -safemode leave
+
+# Set an alternate temporary directory
+export TMPDIR=/path/to/larger/tmpdir
+
 # Start Kafka and ZooKeeper
 cd kafka
 nohup ./bin/zookeeper-server-start.sh config/zookeeper.properties > zookeeper.log 2>&1 &
