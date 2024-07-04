@@ -1,27 +1,40 @@
 import torch
 import torch.optim as optim
-import torch.nn as nn
-from model import SimpleModel
 from torch.utils.data import DataLoader, TensorDataset
+from model import SimpleModel
+import psycopg2
+import pandas as pd
 
-# Dummy data
-X_train = torch.randn(100, 10)
-y_train = torch.randn(100, 1)
+# Connect to PostgreSQL
+conn = psycopg2.connect(
+    host="localhost",
+    database="ml_pipeline",
+    user="postgres",
+    password="your_password"
+)
+query = "SELECT * FROM training_data"
+df = pd.read_sql_query(query, conn)
+conn.close()
 
-train_dataset = TensorDataset(X_train, y_train)
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+# Convert dataframe to tensors
+x = torch.tensor(df.drop('target', axis=1).values, dtype=torch.float32)
+y = torch.tensor(df['target'].values, dtype=torch.float32).unsqueeze(1)
 
-model = SimpleModel(input_size=10, hidden_size=20, output_size=1)
+dataset = TensorDataset(x, y)
+dataloader = DataLoader(dataset, batch_size=10)
+
+model = SimpleModel()
 criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.SGD(model.parameters(), lr=0.01)
 
-num_epochs = 10
-for epoch in range(num_epochs):
-    for inputs, targets in train_loader:
+for epoch in range(100):
+    for batch in dataloader:
+        inputs, targets = batch
         optimizer.zero_grad()
         outputs = model(inputs)
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
-    print(f'Epoch {epoch+1}/{num_epochs}, Loss: {loss.item()}')
+
+torch.save(model.state_dict(), '/usr/local/model/model.pth')
 

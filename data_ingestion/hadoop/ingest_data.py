@@ -1,8 +1,5 @@
-from hdfs import InsecureClient
+import os
 
-client = InsecureClient('http://localhost:50070', user='user')
-local_file = '/path/to/local/file.csv'
-hdfs_path = '/path/to/hdfs/file.csv'
-
-client.upload(hdfs_path, local_file)
+os.system("hdfs dfs -mkdir -p /user/hadoopuser/input")
+os.system("hdfs dfs -put /path/to/local/datafile /user/hadoopuser/input")
 

@@ -1,8 +1,11 @@
 import torch
 from model import SimpleModel
 
-def load_model(path='model.pth'):
-    model = SimpleModel(input_size=10, hidden_size=20, output_size=1)
+def load_model(path):
+    model = SimpleModel()
     model.load_state_dict(torch.load(path))
     return model
+
+# Usage
+model = load_model('/usr/local/model/model.pth')
 

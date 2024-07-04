@@ -1,29 +1,13 @@
-import redis
 import torch
-from load_model import load_model
+from model import SimpleModel
 
-# Connect to Redis
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
-
-model = load_model()
+model = SimpleModel()
+model.load_state_dict(torch.load('/usr/local/model/model.pth'))
+model.eval()
 
 def predict(data):
-    # Generate a cache key based on input data
-    cache_key = str(data)
-    
-    # Check if the prediction is already cached
-    cached_result = redis_client.get(cache_key)
-    if cached_result:
-        return eval(cached_result)
-
-    # If not cached, perform prediction
+    inputs = torch.tensor(data['inputs'])
     with torch.no_grad():
-        inputs = torch.tensor(data['inputs'])
         outputs = model(inputs)
-        result = outputs.tolist()
-    
-    # Cache the result
-    redis_client.set(cache_key, str(result))
-    
-    return result
+    return {'outputs': outputs.tolist()}
 

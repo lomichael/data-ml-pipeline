@@ -6,9 +6,9 @@ app = Flask(__name__)
 @app.route('/predict', methods=['POST'])
 def predict_route():
     data = request.json
-    prediction = predict(data)
-    return jsonify(prediction)
+    result = predict(data)
+    return jsonify(result)
 
-if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
 

@@ -17,10 +17,10 @@ This project demonstrates a scalable data processing and machine learning pipeli
 - `ml_training/`: Scripts for model training and registry
 - `model_serving/`: Flask API for model serving
 - `deployment/`: Docker and Kubernetes configurations
-- `config/`: Configuration files
 - `monitoring/`: Logging and monitoring configurations
 - `tests/`: Unit and integration tests
 - `scripts/`: Setup and execution scripts
+- `config/`: Configuration files
 
 ## Setup
 1. Clone the repository:
@@ -34,48 +34,9 @@ cd data-ml-pipeline
 source scripts/setup_env.sh
 ```
 
-3. Install the necessary Python packages if not installed:
+3. Run the pipeline:
 ```sh
-pip install kafka-python hdfs pyspark torch flask optuna redis
-```
-
-## Running the Pipeline
-1. Run data ingestion and preprocessing:
-```sh
-python data_ingestion/kafka/kafka_producer.py
-python data_ingestion/kafka/kafka_consumer.py
-python data_ingestion/hadoop/ingest_data.py
-python data_ingestion/hadoop/process_data.py
-python data_ingestion/spark/preprocess_data.py
-```
-
-2. Train the machine learning model:
-```sh
-python ml_training/models/train.py
-python ml_training/models/hyperparameter_tuning.py
-python ml_training/registry/save_model.py
-```
-
-3. Deploy the Flask API:
-```sh
-docker build -t ml-api model_serving/
-kubectl apply -f deployment/kubernetes/deployment.yaml
-kubectl apply -f deployment/kubernetes/service.yaml
-```
-
-4. Start Redis Server:
-``sh
-sudo service redis-server start
-```
-
-5. Upload data to S3:
-```sh
-aws s3 cp /path/to/local/data s3://my-ml-pipeline-bucket/data --recursive
-```
-
-6. Start monitoring the pipeline:
-```sh
-prometheus --config.file=monitoring/metrics/prometheus_config.yaml
+source scripts/run_pipeline.sh
 ```
 
 ## License
