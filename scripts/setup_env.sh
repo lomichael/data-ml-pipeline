@@ -43,11 +43,18 @@ wget https://downloads.apache.org/spark/spark-3.5.1/spark-3.5.1-bin-hadoop3.tgz
 tar -xzvf spark-3.5.1-bin-hadoop3.tgz
 sudo mv spark-3.5.1-bin-hadoop3 /usr/local/spark
 
+# Install Python packages
+pip3 install kafka-python hdfs pyspark torch flask optuna redis psycopg2-binary
+
 # Set environment variables
 echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> ~/.bashrc
 echo "export HADOOP_HOME=/usr/local/hadoop" >> ~/.bashrc
 echo "export PATH=\$PATH:\$JAVA_HOME/bin:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin:/usr/local/spark/bin" >> ~/.bashrc
 source ~/.bashrc
+
+# Enable Docker BuildKit
+export DOCKER_BUILDKIT=1
+docker buildx create --use
 
 # Format Namenode
 sudo -u hadoopuser /usr/local/hadoop/bin/hdfs namenode -format
