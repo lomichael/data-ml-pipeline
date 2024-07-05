@@ -4,9 +4,9 @@
 sudo -u hadoopuser /usr/local/hadoop/bin/hdfs dfs -mkdir -p /user/hadoopuser/input
 sudo -u hadoopuser /usr/local/hadoop/bin/hdfs dfs -mkdir -p /data
 
-# Upload test data to HDFS (assuming you have local test data files)
-sudo -u hadoopuser /usr/local/hadoop/bin/hdfs dfs -put /path/to/your/local/datafile /user/hadoopuser/input/datafile
-sudo -u hadoopuser /usr/local/hadoop/bin/hdfs dfs -put /path/to/your/local/kafka_data.json /data/kafka_data.json
+# Create placeholder data in HDFS (if no real data available)
+echo '{"name": "test", "value": 1}' > /tmp/datafile
+sudo -u hadoopuser /usr/local/hadoop/bin/hdfs dfs -put /tmp/datafile /user/hadoopuser/input/datafile
 
 # Run data ingestion and preprocessing scripts
 python3 data_ingestion/kafka/kafka_producer.py &
