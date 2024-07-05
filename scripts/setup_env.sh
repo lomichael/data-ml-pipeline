@@ -61,13 +61,18 @@ tar -xzvf spark-3.5.1-bin-hadoop3.tgz
 sudo mv spark-3.5.1-bin-hadoop3 /usr/local/spark
 
 # Install Python packages
-pip3 install --user kafka-python hdfs pyspark torch flask optuna redis psycopg2-binary
+pip3 install --user kafka-python hdfs pyspark torch flask optuna redis psycopg2-binary pandas
 
 # Set environment variables
 echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> ~/.bashrc
 echo "export HADOOP_HOME=/usr/local/hadoop" >> ~/.bashrc
 echo "export PATH=\$PATH:\$JAVA_HOME/bin:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin:/usr/local/spark/bin:/home/ubuntu/.local/bin" >> ~/.bashrc
 source ~/.bashrc
+
+# Install Docker Buildx
+mkdir -p ~/.docker/cli-plugins
+curl -L https://github.com/docker/buildx/releases/download/v0.10.3/buildx-v0.10.3.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
+chmod +x ~/.docker/cli-plugins/docker-buildx
 
 # Enable Docker BuildKit
 export DOCKER_BUILDKIT=1
