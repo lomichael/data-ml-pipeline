@@ -73,6 +73,9 @@ source ~/.bashrc
 export DOCKER_BUILDKIT=1
 docker buildx create --name mybuilder --driver docker-container --use
 
+# Format Namenode (manual step required)
+echo "When prompted, please answer 'Y' to format the filesystem in the storage directory."
+
 # Format Namenode
 sudo -u hadoopuser /usr/local/hadoop/bin/hdfs namenode -format
 
@@ -81,7 +84,7 @@ sudo -u hadoopuser /usr/local/hadoop/sbin/start-dfs.sh
 sudo -u hadoopuser /usr/local/hadoop/sbin/start-yarn.sh
 
 # Exit Hadoop safe mode
-sudo -u hadoopuser hdfs dfsadmin -safemode leave
+sudo -u hadoopuser /usr/local/hadoop/bin/hdfs dfsadmin -safemode leave
 
 # Set an alternate temporary directory
 export TMPDIR=/path/to/larger/tmpdir
