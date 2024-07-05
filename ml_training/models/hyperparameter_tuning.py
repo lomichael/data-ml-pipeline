@@ -1,49 +1,67 @@
 import torch
+import torch.nn as nn
+import torch.optim as optim
 import optuna
-from torch.utils.data import DataLoader, TensorDataset
-from model import SimpleModel
 import psycopg2
 import pandas as pd
 
-# Connect to PostgreSQL
+# Define your PyTorch model architecture
+class SimpleModel(nn.Module):
+    def __init__(self):
+        super(SimpleModel, self).__init__()
+        self.fc1 = nn.Linear(10, 50)
+        self.fc2 = nn.Linear(50, 1)
+
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+# Connect to PostgreSQL database
 conn = psycopg2.connect(
-    host="localhost",
-    database="ml_pipeline",
+    dbname="ml_pipeline",
     user="postgres",
-    password="your_password"
+    password="your_password",
+    host="localhost",
+    port="5432"
 )
-query = "SELECT * FROM training_data"
-df = pd.read_sql_query(query, conn)
-conn.close()
 
-# Convert dataframe to tensors
-x = torch.tensor(df.drop('target', axis=1).values, dtype=torch.float32)
-y = torch.tensor(df['target'].values, dtype=torch.float32).unsqueeze(1)
+# Fetch data from the database
+query = "SELECT * FROM your_table;"
+data = pd.read_sql_query(query, conn)
 
-dataset = TensorDataset(x, y)
+# Preprocess data
+X = data.iloc[:, :-1].values
+y = data.iloc[:, -1].values
 
+# Convert data to PyTorch tensors
+X = torch.tensor(X, dtype=torch.float32)
+y = torch.tensor(y, dtype=torch.float32)
+
+# Define objective function for Optuna
 def objective(trial):
-    lr = trial.suggest_float('lr', 1e-5, 1e-1, log=True)
-    batch_size = trial.suggest_int('batch_size', 10, 100)
+    # Hyperparameters to tune
+    lr = trial.suggest_loguniform('lr', 1e-5, 1e-1)
+    hidden_size = trial.suggest_int('hidden_size', 10, 100)
 
-    dataloader = DataLoader(dataset, batch_size=batch_size)
-
+    # Define model, criterion, and optimizer
     model = SimpleModel()
     criterion = nn.MSELoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    for epoch in range(10):  # Use fewer epochs for faster tuning
-        for batch in dataloader:
-            inputs, targets = batch
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs, targets)
-            loss.backward()
-            optimizer.step()
+    # Train the model
+    for epoch in range(50):
+        optimizer.zero_grad()
+        outputs = model(X)
+        loss = criterion(outputs, y)
+        loss.backward()
+        optimizer.step()
 
     return loss.item()
 
+# Optimize hyperparameters using Optuna
 study = optuna.create_study(direction='minimize')
 study.optimize(objective, n_trials=100)
-print(study.best_trial)
+
+print("Best hyperparameters: ", study.best_params)
 

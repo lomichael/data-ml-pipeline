@@ -8,6 +8,13 @@ sudo -u hadoopuser /usr/local/hadoop/bin/hdfs dfs -mkdir -p /data
 echo '{"name": "test", "value": 1}' > /tmp/datafile
 sudo -u hadoopuser /usr/local/hadoop/bin/hdfs dfs -put /tmp/datafile /user/hadoopuser/input/datafile
 
+# Check if DataNode is running
+DATANODE_RUNNING=$(jps | grep DataNode)
+if [ -z "$DATANODE_RUNNING" ]; then
+  sudo -u hadoopuser /usr/local/hadoop/sbin/start-dfs.sh
+  sudo -u hadoopuser /usr/local/hadoop/bin/hdfs dfsadmin -safemode leave
+fi
+
 # Run data ingestion and preprocessing scripts
 python3 data_ingestion/kafka/kafka_producer.py &
 python3 data_ingestion/kafka/kafka_consumer.py &
@@ -30,7 +37,7 @@ docker build -t ml-api .
 docker run -p 5000:5000 ml-api
 
 # Deploy with Kubernetes
-minikube start
+minikube start --driver=docker
 kubectl apply -f deployment/kubernetes/deployment.yaml
 kubectl apply -f deployment/kubernetes/service.yaml
 

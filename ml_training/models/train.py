@@ -1,40 +1,56 @@
 import torch
+import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset
-from model import SimpleModel
 import psycopg2
 import pandas as pd
 
-# Connect to PostgreSQL
+# Define your PyTorch model architecture
+class SimpleModel(nn.Module):
+    def __init__(self):
+        super(SimpleModel, self).__init__()
+        self.fc1 = nn.Linear(10, 50)
+        self.fc2 = nn.Linear(50, 1)
+
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+# Connect to PostgreSQL database
 conn = psycopg2.connect(
-    host="localhost",
-    database="ml_pipeline",
+    dbname="ml_pipeline",
     user="postgres",
-    password="your_password"
+    password="your_password",
+    host="localhost",
+    port="5432"
 )
-query = "SELECT * FROM training_data"
-df = pd.read_sql_query(query, conn)
-conn.close()
 
-# Convert dataframe to tensors
-x = torch.tensor(df.drop('target', axis=1).values, dtype=torch.float32)
-y = torch.tensor(df['target'].values, dtype=torch.float32).unsqueeze(1)
+# Fetch data from the database
+query = "SELECT * FROM your_table;"
+data = pd.read_sql_query(query, conn)
 
-dataset = TensorDataset(x, y)
-dataloader = DataLoader(dataset, batch_size=10)
+# Preprocess data
+X = data.iloc[:, :-1].values
+y = data.iloc[:, -1].values
 
+# Convert data to PyTorch tensors
+X = torch.tensor(X, dtype=torch.float32)
+y = torch.tensor(y, dtype=torch.float32)
+
+# Initialize and train the model
 model = SimpleModel()
 criterion = nn.MSELoss()
-optimizer = optim.SGD(model.parameters(), lr=0.01)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 for epoch in range(100):
-    for batch in dataloader:
-        inputs, targets = batch
-        optimizer.zero_grad()
-        outputs = model(inputs)
-        loss = criterion(outputs, targets)
-        loss.backward()
-        optimizer.step()
+    optimizer.zero_grad()
+    outputs = model(X)
+    loss = criterion(outputs, y)
+    loss.backward()
+    optimizer.step()
+    if (epoch+1) % 10 == 0:
+        print(f'Epoch [{epoch+1}/100], Loss: {loss.item():.4f}')
 
-torch.save(model.state_dict(), '/usr/local/model/model.pth')
+# Save the model
+torch.save(model.state_dict(), 'simple_model.pth')
 
