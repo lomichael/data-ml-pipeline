@@ -8,7 +8,7 @@ sudo -u hadoopuser /usr/local/hadoop/bin/hdfs dfs -mkdir -p /data
 echo '{"name": "test", "value": 1}' > /tmp/datafile
 sudo -u hadoopuser /usr/local/hadoop/bin/hdfs dfs -put /tmp/datafile /user/hadoopuser/input/datafile
 
-# Check if DataNode is running
+# Ensure DataNode is running
 DATANODE_RUNNING=$(jps | grep DataNode)
 if [ -z "$DATANODE_RUNNING" ]; then
   sudo -u hadoopuser /usr/local/hadoop/sbin/start-dfs.sh
